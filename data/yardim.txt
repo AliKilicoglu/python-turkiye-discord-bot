@@ -1,0 +1,20 @@
+- Genel -
+yardım              Komutları ve amaçlarını gösterir
+profil              Sunucudaki profilinizi gösterir
+avatar              Birinin profil resmini gösterir
+bot                 Bot hakkında bilgi verir
+sunucu              Sunucu hakkında bilgi verir
+üye                 Bir üye hakkında bilgi verir
+hediye              Başka bir üyeye hediye XP verir
+
+- Yetkili -
+duyuru              Sunucudaki herkese mesajı duyurur
+temizle             Verilen miktarda mesajı siler
+gag                 Bir üyeye chat engeli koyar
+ungag               Bir üyenin chat engelini kaldırır
+
+- Debugging -
+uptime              Botun ne zamandır çalıştığını gösterir
+db                  Veritabanı durumunu gösterir
+reload              İstemleri yeniler
+xp                  Bir kullanıcının XP puanını düzenler
