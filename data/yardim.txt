@@ -5,13 +5,14 @@ avatar              Birinin profil resmini gösterir
 bot                 Bot hakkında bilgi verir
 sunucu              Sunucu hakkında bilgi verir
 üye                 Bir üye hakkında bilgi verir
-hediye              Başka bir üyeye hediye XP verir
 
 - Yetkili -
 duyuru              Sunucudaki herkese mesajı duyurur
 temizle             Verilen miktarda mesajı siler
 gag                 Bir üyeye chat engeli koyar
 ungag               Bir üyenin chat engelini kaldırır
+kick                Bir üyeyi sunucudan atar
+ban                 Bir üyeyi sunucudan süresiz yasaklar
 
 - Debugging -
 uptime              Botun ne zamandır çalıştığını gösterir

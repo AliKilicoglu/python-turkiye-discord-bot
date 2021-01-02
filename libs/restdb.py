@@ -19,20 +19,59 @@ class User:
         self.objid = fields["_id"]
         self.id = int(fields["userid"])
         self.xp = int(fields["level"])
+        self.level = 1
+        self.level_updated = False
         self.calc_level()
         self.discord = None
 
     def update(self):
+        if self.objid is None: self.get_objid()
+        self.calc_level()
         payload = json.dumps({"level":self.xp})
-        response = requests.request("PUT", f"{url}/{self.objid}", data=payload, headers=headers)
+        requests.request("PUT", f"{url}/{self.objid}", data=payload, headers=headers)
+
+    def delete(self):
+        global userlist
+        if self.objid is None: self.get_objid()
+        requests.request("DELETE", f"{url}/{self.objid}", headers=headers)
+        userlist.remove(self)
+
+    def get_objid(self):
+        response = requests.request("GET", url, headers=headers)
+        j = json.loads(response.text)
+        for obj in j:
+            if int(obj["userid"]) == self.id:
+                self.objid = obj["_id"]
+                return
+
+        print(f"Hata: {self.id} ID'li kullanıcı veritabanında bulunamadı")
 
     def calc_level(self):
         level = 0
         for i in level_sheet:
             if self.xp >= i: level += 1
 
+        if level != self.level: self.level_updated = False
         self.level = level
         return self.level
+
+    def pre_xp(self):
+        for i, level in enumerate(level_sheet[::-1]):
+            if self.xp == level:
+                if i == 0: return 0
+                return level_sheet[i-1]
+
+            elif self.xp > level:
+                return level
+
+    def next_xp(self):
+        for i, level in enumerate(level_sheet):
+            if self.xp == level:
+                if i == 6: return level
+                return level_sheet[i+1]
+
+            elif self.xp < level:
+                return level
 
 
 class UserList:
@@ -47,6 +86,9 @@ class UserList:
 
     def append(self, item):
         self.__list.append(item)
+
+    def remove(self, item):
+        self.__list.remove(item)
 
     def get_by_userid(self, userid):
         for user in self.__list:
@@ -74,3 +116,9 @@ def load_all():
                 u.objid = obj["_id"]
         else:
             userlist.append(User(obj))
+
+def new_user(userid):
+    global userlist
+    payload = json.dumps({"userid":userid,"level":0})
+    response = requests.request("POST", url, data=payload, headers=headers)
+    userlist.append(User({"_id":None, "userid":userid, "level":0}))

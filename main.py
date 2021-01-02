@@ -4,9 +4,11 @@
 
 
 import os
+import time
 import discord
 import utils
 from libs import restdb
+
 
 intents = discord.Intents.all()
 client = discord.Client(intents=intents)
@@ -27,6 +29,7 @@ async def on_ready():
 
     # Kullanıcıları veritabanından al
     sunucu = client.get_guild(617712082678448158)
+    utils.update_levels(sunucu)
     restdb.load_all()
 
     for user in restdb.userlist:
@@ -34,16 +37,37 @@ async def on_ready():
         if u:
             user.discord = u
 
-    print("\nKullanıcılar veritabanından alındı\n")
+    #    eğer kullanıcı sunucuda değilse veritabanından sil
+    #
+    #    else:
+    #        print(f"{user.id} (xp:{user.xp}) {u} sunucuda olmadığı için veritabanından silindi")
+    #        user.delete()
+
+    async for message in sunucu.get_channel(791005443833069569).history(limit=1):
+        utils.SON_SAYI = int(message.content)
+
+    print("\nVeritabanı belleğe alındı\n")
     print("Bot başarıyla giriş yaptı\n_________________________________\n")
 
 @client.event
 async def on_member_join(member):
     print(f"Kullanıcı giriş yaptı: {member.name}")
+    restdb.new_user(member.id)
+
+    r1 = member.guild.get_role(712997327513845822)
+    r4 = member.guild.get_role(731954285595590678)
+    r5 = member.guild.get_role(731954451782565900)
+    try: await member.add_roles(r1)
+    except: pass
+    try: await member.add_roles(r4)
+    except: pass
+    try: await member.add_roles(r5)
+    except: pass
 
 @client.event
-async def on_guild_remove(member):
+async def on_member_remove(member):
     print(f"Kullanıcı çıkış yaptı: {member.name}")
+    restdb.userlist.get_by_userid(member.id).delete()
 
 
 ############################################
@@ -54,6 +78,7 @@ async def on_guild_remove(member):
 
 
 commands = list()
+pass_cmds = ("say", "embed", "temizle")
 
 for (dirpath, dirnames, filenames) in os.walk("./commands"):
     for filename in filenames:
@@ -63,6 +88,7 @@ for (dirpath, dirnames, filenames) in os.walk("./commands"):
 print("Yüklenen komutlar:")
 for cmd in commands:
     print(f"  {cmd}")
+
 
 @client.event
 async def on_message(message):
@@ -77,10 +103,12 @@ async def on_message(message):
 
             try:
                 await cmdfile.run(client, message, args, prefix)
+                if cmd in pass_cmds: return
                 await message.add_reaction(utils.POSITIVE)
 
             except Exception as e:
                 await utils.feed_error(e, client, message, args, prefix)
+                if cmd in pass_cmds: return
                 await message.add_reaction(utils.NEGATIVE)
 
         # DEBUGGING
@@ -94,5 +122,54 @@ async def on_message(message):
                 if user: await message.channel.send(f"`get_user` düzgün çalışıyor\nExecute time: {int(dt*1000)}ms\n@return -> discord.User({user.name}#{user.discriminator})")
                 else: await message.channel.send(f"`get_user` düzgün çalışıyor\nExecute time: {int(dt*1000)}ms\n@return -> None")
 
+    else:
+        # SAYI SAYMA OYUNU
+        if message.channel.id == 791005443833069569:
+            if message.content.isdigit():
+                if int(message.content) == utils.SON_SAYI + 1:
+                    utils.SON_SAYI = int(message.content)
 
+                else:
+                    try: await message.author.send(f"Sayı sayma oyununda girmeniz gereken sayı `{utils.SON_SAYI + 1}` iken siz `{int(message.content)}` girdiniz.")
+                    except: pass
+                    await message.delete()
+                    return
+            else:
+                try: await message.author.send(f"Lütfen sayı sayma oyununda sayı kullanınız.")
+                except: pass
+                await message.delete()
+                return
+
+        # KELİME TÜRETMECE OYUNU
+        elif message.channel.id == 791005667056943105:
+            pass
+
+        # NORMAL MESAJ
+        else:
+            if not (message.author.id in utils.SON_MESAJLAR): utils.SON_MESAJLAR[message.author.id] = time.time()
+            if time.time() - utils.SON_MESAJLAR[message.author.id] < 5: return
+
+            user = restdb.userlist.get_by_userid(message.author.id)
+            if not user:
+                resdb.new_user(message.author.id)
+                user = restdb.userlist.get_by_userid(message.author.id)
+
+            xp = restdb.userlist.get_by_userid(message.author.id)
+
+            inc = len(message.content.replace(" ", "")) / 20
+            if inc <= 1: inc = 1
+            else: inc = int(inc)
+
+            user.xp += inc
+            user.update()
+
+            if user.level_updated:
+                user.level_updated = False
+
+                await utils.update_level_role(message.author, user.level)
+
+            utils.SON_MESAJLAR[message.author.id] = time.time()
+
+
+utils.LOGTIME = time.time()
 client.run(os.environ["TOKEN"])

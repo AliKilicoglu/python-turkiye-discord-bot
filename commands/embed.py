@@ -1,3 +1,6 @@
+import discord
+
+
 async def run(client, message, args, prefix):
     if message.author.id in (311542309252497409, 300191414569009153):
         if len(message.channel_mentions) == 0:
@@ -8,4 +11,6 @@ async def run(client, message, args, prefix):
             msg = " ".join(args[1:])
 
         await message.delete()
-        await chn.send(msg)
+        embed = discord.Embed.from_dict(eval(" ".join(args[1:])))
+        embed.set_thumbnail(url=message.guild.icon_url)
+        await chn.send(embed=embed)
