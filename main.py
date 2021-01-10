@@ -151,7 +151,7 @@ async def on_message(message):
 
             user = restdb.userlist.get_by_userid(message.author.id)
             if not user:
-                resdb.new_user(message.author.id)
+                restdb.new_user(message.author.id)
                 user = restdb.userlist.get_by_userid(message.author.id)
 
             xp = restdb.userlist.get_by_userid(message.author.id)
