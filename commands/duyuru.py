@@ -3,7 +3,7 @@ import utils
 
 async def run(client, message, args, prefix):
     if utils.is_dev(message.author):
-        mesaj = message.content[len(prefix) + len(cmd):]
+        mesaj = message.content[len(prefix) + len("duyuru"):]
         basarisiz = list()
 
         for i, u in enumerate(message.guild.members):
