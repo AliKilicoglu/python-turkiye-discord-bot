@@ -29,13 +29,17 @@ async def on_ready():
 
     # Kullanıcıları veritabanından al
     sunucu = client.get_guild(617712082678448158)
-    utils.update_levels(sunucu)
-    restdb.load_all()
 
-    for user in restdb.userlist:
-        u = sunucu.get_member(user.id)
-        if u:
-            user.discord = u
+    async for message in sunucu.get_channel(791005443833069569).history(limit=1):
+        utils.SON_SAYI = int(message.content)
+
+    # utils.update_levels(sunucu)
+    # restdb.load_all()
+    #
+    # for user in restdb.userlist:
+    #     u = sunucu.get_member(user.id)
+    #     if u:
+    #         user.discord = u
 
     #    eğer kullanıcı sunucuda değilse veritabanından sil
     #
@@ -43,8 +47,6 @@ async def on_ready():
     #        print(f"{user.id} (xp:{user.xp}) {u} sunucuda olmadığı için veritabanından silindi")
     #        user.delete()
 
-    async for message in sunucu.get_channel(791005443833069569).history(limit=1):
-        utils.SON_SAYI = int(message.content)
 
     print("\nVeritabanı belleğe alındı\n")
     print("Bot başarıyla giriş yaptı\n_________________________________\n")
@@ -52,7 +54,7 @@ async def on_ready():
 @client.event
 async def on_member_join(member):
     print(f"Kullanıcı giriş yaptı: {member.name}")
-    restdb.new_user(member.id)
+    #restdb.new_user(member.id)
 
     r1 = member.guild.get_role(712997327513845822)
     r4 = member.guild.get_role(731954285595590678)
@@ -146,29 +148,30 @@ async def on_message(message):
 
         # NORMAL MESAJ
         else:
-            if not (message.author.id in utils.SON_MESAJLAR): utils.SON_MESAJLAR[message.author.id] = time.time()
-            if time.time() - utils.SON_MESAJLAR[message.author.id] < 5: return
-
-            user = restdb.userlist.get_by_userid(message.author.id)
-            if not user:
-                restdb.new_user(message.author.id)
-                user = restdb.userlist.get_by_userid(message.author.id)
-
-            xp = restdb.userlist.get_by_userid(message.author.id)
-
-            inc = len(message.content.replace(" ", "")) / 20
-            if inc <= 1: inc = 1
-            else: inc = int(inc)
-
-            user.xp += inc
-            user.update()
-
-            if user.level_updated:
-                user.level_updated = False
-
-                await utils.update_level_role(message.author, user.level)
-
-            utils.SON_MESAJLAR[message.author.id] = time.time()
+            pass
+            # if not (message.author.id in utils.SON_MESAJLAR): utils.SON_MESAJLAR[message.author.id] = time.time()
+            # if time.time() - utils.SON_MESAJLAR[message.author.id] < 5: return
+            #
+            # user = restdb.userlist.get_by_userid(message.author.id)
+            # if not user:
+            #     restdb.new_user(message.author.id)
+            #     user = restdb.userlist.get_by_userid(message.author.id)
+            #
+            # xp = restdb.userlist.get_by_userid(message.author.id)
+            #
+            # inc = len(message.content.replace(" ", "")) / 20
+            # if inc <= 1: inc = 1
+            # else: inc = int(inc)
+            #
+            # user.xp += inc
+            # user.update()
+            #
+            # if user.level_updated:
+            #     user.level_updated = False
+            #
+            #     await utils.update_level_role(message.author, user.level)
+            #
+            # utils.SON_MESAJLAR[message.author.id] = time.time()
 
 
 utils.LOGTIME = time.time()
