@@ -33,19 +33,20 @@ async def on_ready():
     async for message in sunucu.get_channel(791005443833069569).history(limit=1):
         utils.SON_SAYI = int(message.content)
 
-    # utils.update_levels(sunucu)
-    # restdb.load_all()
-    #
-    # for user in restdb.userlist:
-    #     u = sunucu.get_member(user.id)
-    #     if u:
-    #         user.discord = u
+    utils.update_levels(sunucu)
+    restdb.load_all()
+    
+    for user in restdb.userlist:
+
+        u = sunucu.get_member(user.id)
+        if u:
+            user.discord = u
 
     #    eğer kullanıcı sunucuda değilse veritabanından sil
-    #
-    #    else:
-    #        print(f"{user.id} (xp:{user.xp}) {u} sunucuda olmadığı için veritabanından silindi")
-    #        user.delete()
+    
+        else:
+            print(f"{user.id} (xp:{user.xp}) {u} sunucuda olmadığı için veritabanından silindi")
+            user.delete()
 
 
     print("\nVeritabanı belleğe alındı\n")
@@ -148,30 +149,31 @@ async def on_message(message):
 
         # NORMAL MESAJ
         else:
-            pass
-            # if not (message.author.id in utils.SON_MESAJLAR): utils.SON_MESAJLAR[message.author.id] = time.time()
-            # if time.time() - utils.SON_MESAJLAR[message.author.id] < 5: return
-            #
-            # user = restdb.userlist.get_by_userid(message.author.id)
-            # if not user:
-            #     restdb.new_user(message.author.id)
-            #     user = restdb.userlist.get_by_userid(message.author.id)
-            #
-            # xp = restdb.userlist.get_by_userid(message.author.id)
-            #
-            # inc = len(message.content.replace(" ", "")) / 20
-            # if inc <= 1: inc = 1
-            # else: inc = int(inc)
-            #
-            # user.xp += inc
-            # user.update()
-            #
-            # if user.level_updated:
-            #     user.level_updated = False
-            #
-            #     await utils.update_level_role(message.author, user.level)
-            #
-            # utils.SON_MESAJLAR[message.author.id] = time.time()
+            if not (message.author.id in utils.SON_MESAJLAR): utils.SON_MESAJLAR[message.author.id] = time.time()
+            if time.time() - utils.SON_MESAJLAR[message.author.id] < 5: return
+            
+            user = restdb.userlist.get_by_userid(message.author.id)
+            if not user:
+                restdb.new_user(message.author.id)
+                user = restdb.userlist.get_by_userid(message.author.id)
+            
+            xp = restdb.userlist.get_by_userid(message.author.id)
+            
+            inc = len(message.content.replace(" ", "")) / 20
+             
+            if inc <= 1: 
+                inc = 1
+             
+            else: 
+                inc = int(inc)
+            
+            user.xp += inc
+            user.update()
+            
+            if user.level_updated:
+                user.level_updated = False
+                await utils.update_level_role(message.author, user.level)
+                utils.SON_MESAJLAR[message.author.id] = time.time()
 
 
 utils.LOGTIME = time.time()
